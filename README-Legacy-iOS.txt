@@ -1,13 +1,27 @@
-Doodland TV Legacy Web App
-==========================
+Doodland TV Legacy Web App - Playback Fix
+========================================
 
-Designed to keep the front end compatible with iOS 6 Safari and iOS 8 Safari.
+This version fixes the broken player source that pointed to /api/stream/... .
+That relative URL only works if a compatible backend is deployed at the same
+origin; GitHub Pages and other static hosts do not run server.js. The video now
+uses the real absolute ErsatzTV HLS URL directly, and the guide is read directly
+from the XMLTV URL.
 
-IMPORTANT DEPLOYMENT NOTES
-- Upload these files to the same origin as the server/Worker that provides /api/now-playing and /api/stream/.
-- The player uses Safari's native HLS support, not MediaSource Extensions or an external JavaScript player.
-- It does not autoplay or automatically mute.
-- This is a web app, not an iOS App Store app. On iOS 6, open the hosted page in Safari, then use Share > Add to Home Screen.
-- If you deploy it under a subdirectory rather than the domain root, change the two /api/... paths in index.html and app.js to match that deployment.
-- The included server.js is the backend from the supplied ZIP. It must be deployed as a compatible edge Worker/runtime. Static hosting alone will not provide the /api endpoints.
-- Old iOS versions can have modern HTTPS/TLS certificate compatibility issues. If the page loads but the video reports an error, test the manifest URL in Safari and check the hosting/TLS setup.
+PLAYBACK
+- Open index.html from your HTTPS website in Safari on iOS 6 or iOS 8.
+- Tap the native video play control. It does not autoplay or mute itself.
+- If the player errors, tap the "open the stream directly" link. If that URL
+  also fails in Safari, the problem is the stream endpoint, TLS/certificate
+  trust, or stream format, not the page's JavaScript.
+
+IMPORTANT
+- The stream host must remain reachable at:
+  https://eeeeeeee.taild40b43.ts.net/iptv/channel/1.m3u8?mode=segmenter
+- The XMLTV endpoint must allow cross-origin requests (CORS) for the guide title
+  to load. Video playback itself does not depend on the guide request succeeding.
+- iOS 6 and iOS 8 are old enough that HTTPS certificate and TLS compatibility
+  can still be a separate blocker. This package removes the broken /api paths,
+  but cannot override Safari's certificate checks or repair a server-side stream.
+- The included server.js is retained for reference, but is not required for this
+  static-hosting version. Do not expect GitHub Pages to execute server.js.
+- No autoplay, no forced mute, no MediaSource Extensions, no external player.

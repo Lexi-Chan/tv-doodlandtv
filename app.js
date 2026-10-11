@@ -2,7 +2,7 @@
   var title = document.getElementById("program-title");
   var video = document.getElementById("live-video");
   var status = document.getElementById("player-status");
-  var STREAM_URL = "https://eeeeeeee.taild40b43.ts.net/iptv/channel/1.m3u8?mode=segmenter";
+  var STREAM_URL = "https://eeeeeeee.taild40b43.ts.net/iptv/channel/1.ts";
   var XMLTV_URL = "https://eeeeeeee.taild40b43.ts.net/iptv/xmltv.xml";
 
   function setStatus(message) {

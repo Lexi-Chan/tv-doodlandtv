@@ -55,7 +55,7 @@ function currentProgram(xml, now) {
 }
 
 function isAllowedStreamPath(path) {
-  return path === "/iptv/channel/1.m3u8" || /^\/iptv\/session\/\d+\/(?:live(?:_sub)?\.m3u8|live\d+\.ts)$/.test(path);
+  return path === "/iptv/channel/1.ts" || path === "/iptv/channel/1.m3u8" || /^\/iptv\/session\/\d+\/(?:live(?:_sub)?\.m3u8|live\d+\.ts)$/.test(path);
 }
 
 function proxyUri(value, manifestUrl) {

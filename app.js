@@ -1,49 +1,58 @@
 (function () {
+  // Detect iOS generation with ES5 syntax for old Mobile Safari.
+  var ua = navigator.userAgent || "";
+  var ios = /OS ([0-9]+)[._]/.exec(ua);
+  var body = document.body;
+  var era = "modern";
+  if (/iPhone|iPad|iPod/.test(ua) && ios) {
+    var major = parseInt(ios[1], 10);
+    if (major >= 5 && major <= 6) { body.className += " ios5-6"; era = "linen"; }
+    else if (major >= 7 && major <= 8) { body.className += " ios7-8"; era = "flat"; }
+  }
+
+  // Use the original icon on iOS 5-6 and the 144px icon on iOS 7-8.
+  // The original icon remains the fallback for non-iOS and unrecognized versions.
+  var iconFile = era === "flat" ? "app-icon-ios7-8.png" : "app-icon.png";
+  var iconLinks = document.getElementById("apple-touch-icon");
+  var faviconLink = document.getElementById("favicon-icon");
+  var iconImages = document.getElementsByTagName("img");
+  var iconIndex;
+  if (iconLinks) iconLinks.setAttribute("href", iconFile);
+  if (faviconLink) faviconLink.setAttribute("href", iconFile);
+  for (iconIndex = 0; iconIndex < iconImages.length; iconIndex++) {
+    if (/(^|\/)app-icon\.png$/.test(iconImages[iconIndex].getAttribute("src") || "")) {
+      iconImages[iconIndex].setAttribute("src", iconFile);
+    }
+  }
+
+  // Defaults: linen/dark on iOS 5-6, flat/light on iOS 7-8.
+  var savedTheme = null;
+  try { savedTheme = window.localStorage.getItem("doodland-tv-theme"); } catch (ignore) {}
+  var theme = (savedTheme === "light" || savedTheme === "dark") ? savedTheme : (era === "linen" ? "dark" : "light");
+  function applyTheme(nextTheme) {
+    body.className = body.className.replace(/\s*theme-(light|dark)\b/g, "");
+    body.className += " theme-" + nextTheme;
+    theme = nextTheme;
+    var lightButton = document.getElementById("theme-light");
+    var darkButton = document.getElementById("theme-dark");
+    if (lightButton) lightButton.className = "appearance-choice" + (theme === "light" ? " selected" : "");
+    if (darkButton) darkButton.className = "appearance-choice" + (theme === "dark" ? " selected" : "");
+    try { window.localStorage.setItem("doodland-tv-theme", theme); } catch (ignore) {}
+  }
+  var lightButton = document.getElementById("theme-light");
+  var darkButton = document.getElementById("theme-dark");
+  if (lightButton) lightButton.onclick = function () { applyTheme("light"); };
+  if (darkButton) darkButton.onclick = function () { applyTheme("dark"); };
+  applyTheme(theme);
+
   var title = document.getElementById("program-title");
   var video = document.getElementById("live-video");
   var status = document.getElementById("player-status");
-  var liveBadge = document.getElementById("live-badge");
-  var liveBadgeText = document.getElementById("live-badge-text");
-  var STREAM_URL = "https://lexi.taild40b43.ts.net/legacy/live.m3u8";
-  var XMLTV_URL = "https://lexi.taild40b43.ts.net/iptv/xmltv.xml";
+  var STREAM_URL = "https://eeeeeeee.taild40b43.ts.net/iptv/channel/1.ts";
+  var XMLTV_URL = "https://eeeeeeee.taild40b43.ts.net/iptv/xmltv.xml";
 
   function setStatus(message) {
     if (status) status.innerHTML = message;
-  }
-
-  /*
-   * Determine whether the HLS playlist is a rolling live stream or a
-   * finished recording/snippet. A playlist without EXT-X-ENDLIST is live;
-   * a playlist containing EXT-X-ENDLIST has ended. If the playlist cannot
-   * be reached, show UNKNOWN rather than guessing.
-   */
-  function setLiveBadge(kind, message) {
-    if (!liveBadge || !liveBadgeText) return;
-    liveBadge.className = "live-button " + (kind === "live" ? "is-live" : kind === "snippet" ? "is-snippet" : "is-unknown");
-    liveBadgeText.innerHTML = message;
-    liveBadge.title = kind === "live" ? "The HLS playlist is updating as a live stream" : kind === "snippet" ? "The HLS playlist has ended; this appears to be a snippet or recording" : "Could not determine whether the stream is live";
-  }
-
-  function checkStreamType() {
-    var request = new XMLHttpRequest();
-    request.open("GET", STREAM_URL + (STREAM_URL.indexOf("?") >= 0 ? "&" : "?") + "status=" + new Date().getTime(), true);
-    request.onreadystatechange = function () {
-      if (request.readyState !== 4) return;
-      if (request.status >= 200 && request.status < 300) {
-        var playlist = request.responseText || "";
-        if (playlist.indexOf("#EXTM3U") !== 0) {
-          setLiveBadge("unknown", "UNKNOWN");
-        } else if (/#EXT-X-ENDLIST/i.test(playlist)) {
-          setLiveBadge("snippet", "SNIPPET");
-        } else {
-          setLiveBadge("live", "LIVE");
-        }
-      } else {
-        setLiveBadge("unknown", "UNKNOWN");
-      }
-    };
-    request.onerror = function () { setLiveBadge("unknown", "UNKNOWN"); };
-    request.send(null);
   }
 
   // Use Safari's built-in HLS player. No MSE, fetch(), promises, or modern JS syntax.
@@ -126,6 +135,4 @@
 
   loadProgram();
   window.setInterval(loadProgram, 60000);
-  checkStreamType();
-  window.setInterval(checkStreamType, 30000);
 }());

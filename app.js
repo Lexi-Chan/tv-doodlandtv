@@ -2,11 +2,48 @@
   var title = document.getElementById("program-title");
   var video = document.getElementById("live-video");
   var status = document.getElementById("player-status");
-  var STREAM_URL = "https://eeeeeeee.taild40b43.ts.net/iptv/channel/1.ts";
-  var XMLTV_URL = "https://eeeeeeee.taild40b43.ts.net/iptv/xmltv.xml";
+  var liveBadge = document.getElementById("live-badge");
+  var liveBadgeText = document.getElementById("live-badge-text");
+  var STREAM_URL = "https://lexi.taild40b43.ts.net/legacy/live.m3u8";
+  var XMLTV_URL = "https://lexi.taild40b43.ts.net/iptv/xmltv.xml";
 
   function setStatus(message) {
     if (status) status.innerHTML = message;
+  }
+
+  /*
+   * Determine whether the HLS playlist is a rolling live stream or a
+   * finished recording/snippet. A playlist without EXT-X-ENDLIST is live;
+   * a playlist containing EXT-X-ENDLIST has ended. If the playlist cannot
+   * be reached, show UNKNOWN rather than guessing.
+   */
+  function setLiveBadge(kind, message) {
+    if (!liveBadge || !liveBadgeText) return;
+    liveBadge.className = "live-button " + (kind === "live" ? "is-live" : kind === "snippet" ? "is-snippet" : "is-unknown");
+    liveBadgeText.innerHTML = message;
+    liveBadge.title = kind === "live" ? "The HLS playlist is updating as a live stream" : kind === "snippet" ? "The HLS playlist has ended; this appears to be a snippet or recording" : "Could not determine whether the stream is live";
+  }
+
+  function checkStreamType() {
+    var request = new XMLHttpRequest();
+    request.open("GET", STREAM_URL + (STREAM_URL.indexOf("?") >= 0 ? "&" : "?") + "status=" + new Date().getTime(), true);
+    request.onreadystatechange = function () {
+      if (request.readyState !== 4) return;
+      if (request.status >= 200 && request.status < 300) {
+        var playlist = request.responseText || "";
+        if (playlist.indexOf("#EXTM3U") !== 0) {
+          setLiveBadge("unknown", "UNKNOWN");
+        } else if (/#EXT-X-ENDLIST/i.test(playlist)) {
+          setLiveBadge("snippet", "SNIPPET");
+        } else {
+          setLiveBadge("live", "LIVE");
+        }
+      } else {
+        setLiveBadge("unknown", "UNKNOWN");
+      }
+    };
+    request.onerror = function () { setLiveBadge("unknown", "UNKNOWN"); };
+    request.send(null);
   }
 
   // Use Safari's built-in HLS player. No MSE, fetch(), promises, or modern JS syntax.
@@ -89,4 +126,6 @@
 
   loadProgram();
   window.setInterval(loadProgram, 60000);
+  checkStreamType();
+  window.setInterval(checkStreamType, 30000);
 }());

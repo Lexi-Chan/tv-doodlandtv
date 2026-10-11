@@ -15,7 +15,7 @@ PLAYBACK
 IMPORTANT
 - The stream host must remain reachable at:
   https://lexi.taild40b43.ts.net/legacy/live.m3u8
-- The XMLTV endpoint must allow cross-origin requests (CORS) for the guide title
+- The XMLTV endpoint is `https://lexi.taild40b43.ts.net/iptv/xmltv.xml` and must allow cross-origin requests (CORS) for the guide title
   to load. Video playback itself does not depend on the guide request succeeding.
 - iOS 6 and iOS 8 are old enough that HTTPS certificate and TLS compatibility
   can still be a separate blocker. This package points the player at the direct MPEG-TS endpoint and removes the broken /api paths, but cannot override Safari's certificate checks or repair a server-side stream. Browser support for raw MPEG-TS varies, so test on the target iOS version.

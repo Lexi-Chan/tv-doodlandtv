@@ -1,5 +1,5 @@
 const STREAM_ORIGIN = "https://lexi.taild40b43.ts.net";
-const XMLTV_URL = "https://eeeeeeee.taild40b43.ts.net/iptv/xmltv.xml";
+const XMLTV_URL = "https://lexi.taild40b43.ts.net/iptv/xmltv.xml";
 const STREAM_HOST = new URL(STREAM_ORIGIN).hostname;
 let nowPlayingCache = null;
 let nowPlayingCacheUntil = 0;

@@ -17,8 +17,8 @@
   var faviconLink = document.getElementById("favicon-icon");
   var iconImages = document.getElementsByTagName("img");
   var iconIndex;
-  if (iconLinks) iconLinks.setAttribute("href", iconFile);
-  if (faviconLink) faviconLink.setAttribute("href", iconFile);
+  if (iconLinks) iconLinks.setAttribute("href", iconFile + "?v=3");
+  if (faviconLink) faviconLink.setAttribute("href", iconFile + "?v=3");
   for (iconIndex = 0; iconIndex < iconImages.length; iconIndex++) {
     if (/(^|\/)app-icon\.png$/.test(iconImages[iconIndex].getAttribute("src") || "")) {
       iconImages[iconIndex].setAttribute("src", iconFile);
@@ -49,7 +49,7 @@
   var video = document.getElementById("live-video");
   var status = document.getElementById("player-status");
   var STREAM_URL = "https://lexi.taild40b43.ts.net/legacy/live.m3u8";
-  var XMLTV_URL = "https://eeeeeeee.taild40b43.ts.net/iptv/xmltv.xml";
+  var XMLTV_URL = "https://lexi.taild40b43.ts.net/iptv/xmltv.xml";
 
   function setStatus(message) {
     if (status) status.innerHTML = message;
@@ -113,7 +113,8 @@
   function loadProgram() {
     if (!title) return;
     var request = new XMLHttpRequest();
-    request.open("GET", XMLTV_URL + "?legacy=" + new Date().getTime(), true);
+    try { request.open("GET", XMLTV_URL + "?legacy=" + new Date().getTime(), true); }
+    catch (openError) { title.innerHTML = "Guide unavailable"; return; }
     request.onreadystatechange = function () {
       if (request.readyState !== 4) return;
       if (request.status !== 200) { title.innerHTML = "Guide unavailable"; return; }
@@ -125,7 +126,7 @@
       } catch (e) { title.innerHTML = "Guide unavailable"; }
     };
     request.onerror = function () { title.innerHTML = "Guide unavailable"; };
-    request.send(null);
+    try { request.send(null); } catch (sendError) { title.innerHTML = "Guide unavailable"; }
   }
 
   function escapeText(value) {
@@ -133,6 +134,20 @@
       .replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
+  // iOS 7/8 Safari can mis-measure the video frame during the initial orientation.
+  // Recalculate layout only; do not reload the media element (which can crash old Safari).
+  function refreshLegacyLayout() {
+    var frame = document.querySelector ? document.querySelector(".tv-ratio") : null;
+    if (frame) {
+      frame.style.display = "none";
+      frame.offsetHeight;
+      frame.style.display = "";
+    }
+  }
+  if (window.addEventListener) {
+    window.addEventListener("orientationchange", function () { window.setTimeout(refreshLegacyLayout, 150); }, false);
+    window.addEventListener("resize", refreshLegacyLayout, false);
+  }
   loadProgram();
   window.setInterval(loadProgram, 60000);
 }());

@@ -1,5 +1,5 @@
-const STREAM_ORIGIN = "https://eeeeeeee.taild40b43.ts.net";
-const XMLTV_URL = STREAM_ORIGIN + "/iptv/xmltv.xml";
+const STREAM_ORIGIN = "https://lexi.taild40b43.ts.net";
+const XMLTV_URL = "https://eeeeeeee.taild40b43.ts.net/iptv/xmltv.xml";
 const STREAM_HOST = new URL(STREAM_ORIGIN).hostname;
 let nowPlayingCache = null;
 let nowPlayingCacheUntil = 0;
@@ -55,7 +55,7 @@ function currentProgram(xml, now) {
 }
 
 function isAllowedStreamPath(path) {
-  return path === "/iptv/channel/1.ts" || path === "/iptv/channel/1.m3u8" || /^\/iptv\/session\/\d+\/(?:live(?:_sub)?\.m3u8|live\d+\.ts)$/.test(path);
+  return path === "/legacy/live.m3u8" || /^\/legacy\/[A-Za-z0-9._-]+\.(?:m3u8|ts|m4s|mp4|aac)$/.test(path);
 }
 
 function proxyUri(value, manifestUrl) {
